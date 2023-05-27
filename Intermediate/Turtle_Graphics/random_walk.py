@@ -14,7 +14,7 @@ rt.speed("fast")
 screen = t.Screen()
 screen.colormode(255)
 
-while True:
+for _ in range(50):
     random_direction(rt)
     rt.pencolor((randint(0, 255), randint(0, 255), randint(0, 255)))
     rt.forward(20)
