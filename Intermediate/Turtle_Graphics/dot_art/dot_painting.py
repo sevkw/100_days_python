@@ -4,7 +4,7 @@ from random import choice
 
 def extract_colors(image, num_colors):
     """Return the rgb of extracted colors from a given image."""
-    colors = colorgram.extract( image, num_colors)
+    colors = colorgram.extract(image, num_colors)
     rgb_list = []
     for c in colors:
         r = c.rgb.r
