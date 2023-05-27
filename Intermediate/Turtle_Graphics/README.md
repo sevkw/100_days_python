@@ -2,6 +2,11 @@
 
 This set of python project are built using Python [turtle module](https://docs.python.org/3/library/turtle.html#module-turtle).
 
+## Dot Art
+
+Here is a sample dot art produced through running the `dot_painting.py`.
+
+![Sample Dot Art!](100_days_python\Intermediate\Turtle_Graphics\dot_art\sample_dot_painting.jpg)
 
 ### Warning for Ubuntu or LINUX Users
 
