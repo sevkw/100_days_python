@@ -33,9 +33,9 @@ def draw_dots(dotsize, dotperrow, num_colors):
     for _ in range(dotperrow):
         for _ in range(dotperrow):
             dot_color = choice(color_list)
+            dotty.penup()
             dotty.dot(dotsize, dot_color)
             dotty.forward(dotsize)
-            dotty.penup()
             dotty.forward(dotsize)
         row += 1
         dotty.goto(0, row*dotsize*2)
