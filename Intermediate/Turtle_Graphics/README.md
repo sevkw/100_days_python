@@ -27,3 +27,9 @@ Here is a sample dot art produced through running the `dot_painting.py`.
 
 When I tried running Turtle Module on my local machine through Ubuntu, I had some trouble with the tkinter module and $DISPLAY variable.
 Hence, I made my Tutle graphics project via my PowerShell CLI (as I do not want to waste time setting up for Ubuntu or LINUX).
+
+## Etch A Sketch
+This is a small game that allows user to control the turtle using keyboard and draw lines in instructed directions.
+
+## Turtle Race
+This is a small race bet game that allows the user to guess which turtle will be the first to touch the finishing line.
