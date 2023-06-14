@@ -2,8 +2,6 @@ from turtle import Turtle
 
 
 MOVE_DISTANCE = 20
-UP = 90
-DOWN = 270
 
 class Paddle(Turtle):
     def __init__(self, position):

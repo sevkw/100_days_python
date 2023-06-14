@@ -1,5 +1,9 @@
-from turtle import Turtle, Screen
+from turtle import Screen
+from snake import Snake
+from food import Food
+from scoreboard import Scoreboard
 import time
+
 screen = Screen()
 screen.setup(width=600, height=600)
 screen.bgcolor("black")
@@ -7,22 +11,15 @@ screen.title("PINK Snake Game")
 # turn off the animation using tracer(0)
 screen.tracer(0)
 
-## create starting snake body
-## As 3 white squares with 20*20 pixels each
+scoreboard = Scoreboard()
+snake = Snake()
+food = Food()
 
-starting_positions = [(0, 0), (-20, 0), (-40, 0)]
-
-segments = []
-
-for t in range(0, 3):
-    new_segment = Turtle(shape="square")
-    new_segment.color("pink")
-    new_segment.penup()
-    new_segment.setpos(starting_positions[t])
-    segments.append(new_segment)
-
-
-## to move the starting segments
+screen.listen()
+screen.onkey(snake.up, "Up")
+screen.onkey(snake.down, "Down")
+screen.onkey(snake.left, "Left")
+screen.onkey(snake.right, "Right")
 
 game_is_on = True
 
@@ -30,11 +27,23 @@ while game_is_on:
     # allow the snake segments to move forward at the same time
     screen.update()
     time.sleep(0.1)
+    snake.move()
 
-    for seg_num in range(len(segments)-1, 0, -1):
-        new_x = segments[seg_num - 1].xcor()
-        new_y = segments[seg_num - 1].ycor()
-        segments[seg_num].goto(new_x, new_y)
-    segments[0].forward(20)
+    # detect collision with food
+    if snake.head.distance(food) < 15:
+        food.refresh()
+        snake.extend()
+        scoreboard.update_score()
     
+    # detect collision with wall
+    if snake.head.xcor() > 290 or snake.head.xcor() < -290 or snake.head.ycor() > 290 or snake.head.ycor() < -290:
+        game_is_on = False
+        scoreboard.game_over()
+
+    # detect collision with tail
+    for segment in snake.segments[1:]:
+        if snake.head.distance(segment) < 10:
+            game_is_on = False
+            scoreboard.game_over()
+
 screen.exitonclick()
