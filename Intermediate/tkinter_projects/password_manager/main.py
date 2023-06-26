@@ -2,9 +2,11 @@ from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
 import pyperclip
+import json
 
 ## Global Variables
 FONT = ("Arial", 10)
+DATA_FILE = "data.json"
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 ## copied from: https://replit.com/@appbrewery/password-generator-end#main.py
 def generate_password():
@@ -32,30 +34,63 @@ def generate_password():
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save():
-    password = []
+    # password = []
     website = web_input.get()
     user_addr = username_input.get()
     pswd = pswd_inpt.get()
-    password.append(website)
-    password.append(user_addr)
-    password.append(pswd)
+    new_data = {
+        website:{
+            "email": user_addr,
+            "password": pswd
+            }
+    }
+
+    # password.append(website)
+    # password.append(user_addr)
+    # password.append(pswd)
 
     if len(website) == 0 or len(pswd) == 0:
         messagebox.showerror(title="Ooops!", message="Please do not leave any fields empty!😭")
     else:
-    # show a pop-up message box to confirm
-        is_ok = messagebox.askokcancel(title=website,
-                            message=f"These are the details entered: \nEmail: {user_addr}\nPassword: {pswd}\n Is it okay to save?")
-        if is_ok:
-            with open("data.txt", "a") as data:
-                for i in password:
-                    data.write(i+"|")
-                data.write('\n')
+        try:
+            with open(DATA_FILE, "r") as data_file:
+                # reading old data
+                data = json.load(data_file)
+                # update the old data
 
+            with open(DATA_FILE, "w") as data_file:
+                # write the updated data to the old data file
+                data_file.dump(data, data_file, indent=4)
+        
+        except FileNotFoundError:
+             with open(DATA_FILE, "w") as data_file:
+                 json.dump(new_data, data_file, indent=4)
+        else:
+            data.update(new_data)
+        
+        finally:
             web_input.delete(0, END)
             username_input.delete(0, END)
             username_input.insert(0, "@gmail.com")
             pswd_inpt.delete(0, END)
+
+# ---------------------------- PASSWORD SEARCH ------------------------------- #
+def search_password():
+    website = web_input.get()
+    try:
+        with open(DATA_FILE, "r") as data_file:
+            data = json.load(data_file)
+            email = data[website]['email']
+            password = data[website]['password']
+            username_input.delete(0, END)
+            username_input.insert(0, email)
+            pswd_inpt.insert(0, password)
+    except KeyError:
+        username_input.delete(0, END)
+        username_input.insert(0, "@gmail.com")
+        pswd_inpt.delete(0, END)
+        messagebox.showerror(title="Password not found!", message="Please add the password for this website first. :)")
+        
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -73,8 +108,8 @@ web_label = Label(text="Website:", font=FONT)
 web_label.grid(row=1, column=0)
 
 # website inputbox
-web_input = Entry(width=55)
-web_input.grid(row=1, column=1, columnspan=2)
+web_input = Entry(width=34)
+web_input.grid(row=1, column=1)
 web_input.focus()
 
 # username  and email label
@@ -101,6 +136,10 @@ pswd_button.grid(row=3, column=2)
 # add button
 add_button = Button(text="Add Password", font=FONT, width=40, command=save)
 add_button.grid(row=4, column=1, columnspan=2)
+
+# search button
+search_button = Button(text="Search", font=FONT, width=15, command=search_password)
+search_button.grid(row=1, column=2)
 
 
 
