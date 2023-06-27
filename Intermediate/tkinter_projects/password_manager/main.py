@@ -82,13 +82,12 @@ def search_password():
             data = json.load(data_file)
             email = data[website]['email']
             password = data[website]['password']
-            username_input.delete(0, END)
-            username_input.insert(0, email)
-            pswd_inpt.insert(0, password)
+            messagebox.showinfo(title=website, message=f"Email: {email}\nPassword: {password}")
+    
+    except FileNotFoundError:
+        messagebox.showerror(title="Error", message="No password found. Maybe consider saving some password first?")
+
     except KeyError:
-        username_input.delete(0, END)
-        username_input.insert(0, "@gmail.com")
-        pswd_inpt.delete(0, END)
         messagebox.showerror(title="Password not found!", message="Please add the password for this website first. :)")
         
 
