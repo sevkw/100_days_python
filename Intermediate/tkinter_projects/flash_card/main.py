@@ -5,7 +5,7 @@ import random
 BACKGROUND_COLOR = "#B1DDC6"
 FONT = "Arial"
 LEARNING_FILE = r".\data\japanese_words.csv"
-TO_LEARN_FILE = r"words_to_learn.csv"
+TO_LEARN_FILE = r"data/words_to_learn.csv"
 FLIP_AFTER_MS = 3000 ## in ms
 
 # ----------------------------READ CSV FILE---------------------------- #
@@ -13,7 +13,7 @@ try:
     words_file = pd.read_csv(TO_LEARN_FILE)
 except FileNotFoundError:
     words_file = pd.read_csv(LEARNING_FILE)
-    
+
 words_df = pd.DataFrame(words_file)
 
 column_values = words_df.columns.values.tolist()
@@ -39,7 +39,7 @@ def pick_word():
 
 def already_known():
     word_dict.remove(current_word)
-    pd.DataFrame(word_dict).to_csv("words_to_learn.csv", index=False)
+    pd.DataFrame(word_dict).to_csv(TO_LEARN_FILE, index=False)
     pick_word()
 
 def flip_card():
