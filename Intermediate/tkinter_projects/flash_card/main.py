@@ -5,6 +5,7 @@ import random
 BACKGROUND_COLOR = "#B1DDC6"
 FONT = "Arial"
 LEARNING_FILE = r".\data\japanese_words.csv"
+FLIP_AFTER_MS = 3000 ## in ms
 
 # ----------------------------READ CSV FILE---------------------------- #
 words_file = pd.read_csv(LEARNING_FILE)
@@ -15,25 +16,42 @@ foreign_language = column_values[0]
 translated_language = column_values[1]
 
 # convert to list of dictionaries 
-jp_word_dict = words_df.to_dict(orient="records")
+word_dict = words_df.to_dict(orient="records")
+
+current_word = {}
 
 # ---------------------------PICK RANDOM WORD ------------------------- #
 def pick_word():
-    current_word = random.choice(jp_word_dict)[foreign_language]
-    front_canvas.itemconfig(word_text, text=f"{current_word}")
+    global current_word, flip_timer
+    # stop flipping card when this func is run
+    window.after_cancel(flip_timer)
+    current_word = random.choice(word_dict)
+    canvas.itemconfig(word_text, text=current_word[foreign_language], fill="black")
+    canvas.itemconfig(language_text, text=foreign_language, fill="black")
+    canvas.itemconfig(card_bg, image=front_img)
+    # need to call after when we look at the next word
+    flip_timer = window.after(FLIP_AFTER_MS, flip_card)
+
+def flip_card():
+    canvas.itemconfig(card_bg, image=back_img)
+    canvas.itemconfig(language_text, text=translated_language, fill="white")
+    canvas.itemconfig(word_text, text=current_word[translated_language], fill="white")
+    
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
 window.title("Japanese Flashcard")
 window.config(padx=50, pady=50, bg=BACKGROUND_COLOR)
 
+flip_timer = window.after(FLIP_AFTER_MS, flip_card)
 # Card Front
-front_canvas = Canvas(width=800, height=526, bg=BACKGROUND_COLOR, highlightthickness=0)
-card_front_img = PhotoImage(file=r".\images\card_front.png")
-front_canvas.create_image(400, 263, image=card_front_img)
-front_canvas.create_text(400, 150, text=foreign_language, font=(FONT, 40, 'italic'))
-word_text = front_canvas.create_text(400, 263, text="Word", font=(FONT, 60, 'bold'))
-front_canvas.grid(row=0, column=0, columnspan=2)
+canvas = Canvas(width=800, height=526, bg=BACKGROUND_COLOR, highlightthickness=0)
+front_img = PhotoImage(file=r".\images\card_front.png")
+back_img = PhotoImage(file=r".\images\card_back.png")
+card_bg = canvas.create_image(400, 263, image=front_img)
+language_text = canvas.create_text(400, 150, text=foreign_language, font=(FONT, 40, 'italic'))
+word_text = canvas.create_text(400, 263, text="Word", font=(FONT, 60, 'bold'))
+canvas.grid(row=0, column=0, columnspan=2)
 
 # wrong button
 wrong_img = PhotoImage(file=r".\images\wrong.png")
@@ -47,4 +65,5 @@ yes_button.grid(row=1, column=1)
 
 pick_word()
 
+# window.after_cancel(window)
 window.mainloop()
