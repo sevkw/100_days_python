@@ -50,7 +50,7 @@ def flip_card():
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
-window.title("Japanese Flashcard")
+window.title(f"{foreign_language} Flashcard")
 window.config(padx=50, pady=50, bg=BACKGROUND_COLOR)
 
 flip_timer = window.after(FLIP_AFTER_MS, flip_card)
