@@ -5,10 +5,15 @@ import random
 BACKGROUND_COLOR = "#B1DDC6"
 FONT = "Arial"
 LEARNING_FILE = r".\data\japanese_words.csv"
+TO_LEARN_FILE = r"words_to_learn.csv"
 FLIP_AFTER_MS = 3000 ## in ms
 
 # ----------------------------READ CSV FILE---------------------------- #
-words_file = pd.read_csv(LEARNING_FILE)
+try:
+    words_file = pd.read_csv(TO_LEARN_FILE)
+except FileNotFoundError:
+    words_file = pd.read_csv(LEARNING_FILE)
+    
 words_df = pd.DataFrame(words_file)
 
 column_values = words_df.columns.values.tolist()
@@ -31,6 +36,11 @@ def pick_word():
     canvas.itemconfig(card_bg, image=front_img)
     # need to call after when we look at the next word
     flip_timer = window.after(FLIP_AFTER_MS, flip_card)
+
+def already_known():
+    word_dict.remove(current_word)
+    pd.DataFrame(word_dict).to_csv("words_to_learn.csv", index=False)
+    pick_word()
 
 def flip_card():
     canvas.itemconfig(card_bg, image=back_img)
@@ -60,7 +70,7 @@ wrong_button.grid(row=1, column=0)
 
 # yes button
 yes_img = PhotoImage(file=r".\images\right.png")
-yes_button = Button(image=yes_img, highlightthickness=0, command=pick_word)
+yes_button = Button(image=yes_img, highlightthickness=0, command=already_known)
 yes_button.grid(row=1, column=1)
 
 pick_word()
