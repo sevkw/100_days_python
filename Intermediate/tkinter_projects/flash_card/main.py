@@ -5,7 +5,7 @@ import random
 BACKGROUND_COLOR = "#B1DDC6"
 FONT = "Arial"
 LEARNING_FILE = r".\data\japanese_words.csv"
-TO_LEARN_FILE = r"data/words_to_learn.csv"
+TO_LEARN_FILE = r"data\words_to_learn.csv"
 FLIP_AFTER_MS = 3000 ## in ms
 
 # ----------------------------READ CSV FILE---------------------------- #
