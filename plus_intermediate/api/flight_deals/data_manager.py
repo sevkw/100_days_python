@@ -29,5 +29,4 @@ class DataManager:
         update_contents = {
             'price': update_dict
         }
-        put_response = requests.put(url=put_url, headers=self.header, json=update_contents)
-        return put_response
+        requests.put(url=put_url, headers=self.header, json=update_contents)
