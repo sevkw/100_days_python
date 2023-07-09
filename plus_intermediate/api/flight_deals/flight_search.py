@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 import requests
-from datetime import date, timedelta
+from datetime import date, datetime
+from flight_data import FlightData
 
 
 load_dotenv(".env.flights")
@@ -29,14 +30,14 @@ class FlightSearch:
         iata_code = response["locations"][0]["code"]
         return iata_code
     
-    def get_price(self, to_city:str):
+    def get_price(self, from_city:str, to_city:str):
         date_format = "%d/%m/%Y"
         search_endpoint = f"{self.endpoint}/search"
         depart_date_from = date(2023, 12, 15).strftime(date_format)
         depart_date_to = date(2024, 1, 10).strftime(date_format)
         
         search_param = {
-            "fly_from": "YTO",
+            "fly_from": from_city,
             "fly_to": to_city,
             "date_from": depart_date_from,
             "date_to": depart_date_to,
@@ -54,9 +55,15 @@ class FlightSearch:
         response = requests.get(url=search_endpoint, headers=self.header, params=search_param)
         response_data = response.json()["data"]
         if len(response_data) > 0:
-            # low_price = response_data[0]["price"]
-            price_list = [ {data["cityCodeTo"] : data["price"]} for data in response_data]
-            return price_list[0]
-        # else:
-        #     return {to_city : min_price}
-
+            data = response_data[0]
+            route_data = data["route"][0]
+            flight_data = FlightData(
+                price=data["price"],
+                origin_city=route_data["cityFrom"],
+                destination_city=route_data["cityTo"],
+                origin_airport=route_data["flyFrom"],
+                destination_airport=route_data["flyTo"],
+                departure_date=datetime.fromtimestamp(route_data["dTime"]).strftime("%Y-%m-%d"),
+                return_date=datetime.fromtimestamp(data["route"][1]["dTime"]).strftime("%Y-%m-%d")
+            )
+        return flight_data

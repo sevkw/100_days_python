@@ -1,16 +1,16 @@
 #This file will need to use the DataManager,FlightSearch, FlightData, NotificationManager classes to achieve the program requirements.
 from data_manager import DataManager
 from flight_search import FlightSearch
+from notification_manager import NotificationManager
 
 from pprint import pprint
+
+ORIGIN_CITY_IATA = "YTO"
 
 data_manager = DataManager()
 sheet_data = data_manager.get_data()
 flight_search = FlightSearch()
-# pprint(sheet_data)
-# pprint(sheet_data[0]['iataCode'])
 
-city_list = []
 ## update IATA Code for Cities
 for data in sheet_data:
     if data["iataCode"] == "":
@@ -20,14 +20,13 @@ for data in sheet_data:
         update_code = {'iataCode' : data['iataCode']}
         row_id = data['id']
         data_manager.update_data(row_id, update_code)
-    ## append IATA City codes to a list
-    # city_list.append({data['iataCode']:data['lowestPrice']})
-    city_list.append(data['iataCode'])
 
-if len(city_list) > 0:
-    for city in city_list:
-        # to_city = list(city.keys())[0]
-        # to_city_low_price = int(list(city.values())[0])
-        # search_low_price = flight_search.get_price(to_city, to_city_low_price)
-        search_low_price = flight_search.get_price(city)
-        print(search_low_price)
+for destination in sheet_data:
+
+    flight_data = flight_search.get_price(from_city=ORIGIN_CITY_IATA, to_city=destination["iataCode"])
+
+    if flight_data.price < destination["lowestPrice"]:
+        message = f"Low price alert! Only ${flight_data.price} from {flight_data.origin_city}-{flight_data.origin_airport} to {flight_data.destination_city}-{flight_data.destination_airport}, from {flight_data.departure_date} to {flight_data.return_date}."
+        print(message)
+        messenger = NotificationManager()
+        messenger.send_message(message_body=message)
