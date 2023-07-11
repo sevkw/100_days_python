@@ -33,12 +33,12 @@ for destination in sheet_data:
             email_message = "\n" + message + "\n" + stop_over_msg
         else:
             print(message)
-            email_message = email_message + message
+            email_message = message
 
 # Send email to registered users if there are any users
-users_list = data_manager.get_users()
-if len(users_list) > 0:
-    for user in users_list:
-        user_fn = user["firstName"]
-        user_email = user["email"]
-        notifier.send_emails(user_fn=user_fn, user_email=user_email, message=email_message)
+        users_list = data_manager.get_users()
+        if len(users_list) > 0:
+            for user in users_list:
+                user_fn = user["firstName"]
+                user_email = user["email"]
+                notifier.send_emails(user_fn=user_fn, user_email=user_email, message=email_message)
