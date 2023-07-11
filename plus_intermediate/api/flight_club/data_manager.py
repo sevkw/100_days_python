@@ -7,6 +7,7 @@ import requests
 load_dotenv(r"..\flight_deals\.env.flights")
 
 SHEETY_ENDPOINT = os.getenv("SHEETY_ENDPOINT")
+SHEETY_USERS_ENDPOINT = os.getenv("SHEETY_USERS_ENDPOINT")
 SHEETY_TOKEN = os.getenv("SHEETY_TOKEN")
 
 class DataManager:
@@ -17,6 +18,7 @@ class DataManager:
         self.header = {
             "Authorization": self.token,
         }
+        self.user_endpoint = SHEETY_USERS_ENDPOINT
     
     def get_data(self):
         """Get and return data from Google Sheet"""
@@ -31,3 +33,11 @@ class DataManager:
             'price': update_dict
         }
         requests.put(url=put_url, headers=self.header, json=update_contents)
+    
+    def get_users(self):
+        """
+        Get registered users from the Users Tab in Google Sheets.
+        """
+        get_response = requests.get(url=self.user_endpoint, headers=self.header)
+        user_data = get_response.json()["users"]
+        return user_data
