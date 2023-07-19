@@ -2,3 +2,5 @@ plus_intermediate/api/stock_news/.env
 plus_intermediate/api/habit_tracker/.env.pixela
 plus_intermediate/api/exerciser_tracker/.env.ex_tracker
 plus_intermediate/api/flight_deals/.env.flights
+plus_intermediate/web_scraping/beautiful_soup/music_machine/.env.spotify
+plus_intermediate/web_scraping/beautiful_soup/music_machine/.cache
