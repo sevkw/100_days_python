@@ -23,16 +23,13 @@ board_page = requests.get(BOARD_URL).text
 
 soup = BeautifulSoup(board_page, "html.parser")
 
-# print(historical_board_url)
-
-# songs = soup.select("li h3")
 songs = soup.find_all(name="h3", class_="a-no-trucate")
 
 song_list = [song.text.strip() for song in songs]
 
 ## Spotify
 
-sp_scope = "playlist-modify-private"
+sp_scope = ["playlist-modify-private", "playlist-read-private"]
 
 sp = spotipy.Spotify(
         auth_manager=SpotifyOAuth(
@@ -43,8 +40,6 @@ sp = spotipy.Spotify(
     )
 
 
-# user_id = sp.me()["id"]
-# user_uri = sp.me()["uri"]
 track_uri_list = []
 
 for song in song_list:
@@ -57,10 +52,39 @@ for song in song_list:
         track_uri = result["tracks"]["items"][0]["uri"]
         track_uri_list.append(track_uri)
     except IndexError:
-        print(f"Track:{song} not found, skipped.")
+        # print(f"Track:{song} not found, skipped.")
         pass
 
-print(f"{len(track_uri_list)} tracks uri added.")
-print(track_uri_list)
-# print(result["tracks"]["items"][0]["album"]["uri"])
+print(f"{len(track_uri_list)} tracks uri found.")
 
+## https://spotipy.readthedocs.io/en/2.22.1/#spotipy.client.Spotify.user_playlist_create
+# https://spotipy.readthedocs.io/en/2.22.1/#spotipy.client.Spotify.user_playlist_add_tracks
+
+user_id = sp.me()["id"]
+play_list_items = sp.user_playlists(user=user_id)["items"]
+play_lists = {i["name"]:i["id"] for i in play_list_items}
+new_play_list_name = f"{date_input} Billboard 100"
+
+## add the play_list
+
+if new_play_list_name not in play_lists:
+    sp.user_playlist_create(
+        user=user_id,
+        name=new_play_list_name,
+        public=False,
+        collaborative=False
+        )
+    
+    print(f"A new private playlist {new_play_list_name} has been added!")
+    
+    new_play_list_items = sp.user_playlists(user=user_id)["items"]
+    new_play_lists = {i["name"]:i["id"] for i in new_play_list_items}
+    
+    # add songs to playlist
+    sp.user_playlist_add_tracks(
+        user=user_id,
+        playlist_id=new_play_lists[new_play_list_name],
+        tracks=track_uri_list
+    )
+
+    print(f"{len(track_uri_list)} tracks has been added to playlist {new_play_list_name}! Enjoy!")
