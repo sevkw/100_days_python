@@ -53,17 +53,25 @@ company_list = []
 #     company_list.append(company_name)
 
 # follow each company that posted the jobs
-for job in jobs[:1]:
-    job.click()
+for job in jobs[:2]:
+    job_id = job.get_attribute("data-job-id")
+    print(job_id)
+    job_desc = driver.find_element(By.CSS_SELECTOR, f"[data-job-id={job_id}]")
+    job_desc.click()
     time.sleep(1)
-    company_element = driver.find_element(By.XPATH, "//*[@id='main']/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div[1]/div[2]/div/a")
-    company_link = company_element.get_attribute('href')
-    driver.get(company_link)
-    time.sleep(1)
-    follow_button = driver.find_element(By.CSS_SELECTOR, "button.follow")
-    follow_button.click()
-    time.sleep(1)
-    
+    # job_desc = driver.get(By.ID, job_id)
+    # job.click()
+    # time.sleep(1)
+    # company_element = driver.find_element(By.XPATH, "//*[@id='main']/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div[1]/div[2]/div/a")
+    # company_link = company_element.get_attribute('href')
+    # driver.get(company_link)
+    # time.sleep(1)
+    # follow_button = driver.find_element(By.CSS_SELECTOR, "button.follow")
+    # follow_button.click()
+    # time.sleep(1)
+    # # go back to previous page
+    # driver.back()
+    # time.sleep(1)
 
 
 # print(job_titles, company_list)
