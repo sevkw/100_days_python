@@ -6,3 +6,4 @@ plus_intermediate/web_scraping/beautiful_soup/music_machine/.env.spotify
 plus_intermediate/web_scraping/beautiful_soup/music_machine/.cache
 plus_intermediate/web_scraping/beautiful_soup/price_tracker/.env.price_tracker
 plus_intermediate/web_scraping/selenium/linkedin/.env.linkedin
+plus_intermediate/web_scraping/selenium/tinder/.env.tinder
