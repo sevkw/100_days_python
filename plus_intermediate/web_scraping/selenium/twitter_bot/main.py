@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 
 
 CHROME_DRIVER_PATH = r"D:\ChromeDriver\chromedriver.exe"
-PROMISED_DOWN_MBPS = 1500
-PROMISED_UP_MBPS = 940
 
 load_dotenv()
 TWITTER_EMAIL = os.getenv("TWITTER_EMAIL")
@@ -16,4 +14,4 @@ bot = InternetSpeedTwitterBot(CHROME_DRIVER_PATH)
 
 bot.get_internet_speed()
 
-# bot.tweet_at_provider()
+bot.tweet_at_provider(username=TWITTER_EMAIL, password=TWITTER_PASSWORD)
