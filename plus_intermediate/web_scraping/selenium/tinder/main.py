@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Keys
 
-from time import sleep
+
 
 import os
 from dotenv import load_dotenv
