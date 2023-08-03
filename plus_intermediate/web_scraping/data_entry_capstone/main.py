@@ -46,6 +46,5 @@ for n in range(len(address_list)):
     submit_button.click()
     sleep(1)
     submit_again_link = driver.find_element(By.LINK_TEXT, "Submit another response")
-    # driver.get(submit_again_link)
     submit_again_link.click()
 
