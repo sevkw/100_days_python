@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "100-days-python"
+version = "0.1.0"
+description = "A repo contains my project file for Python Bootcamp"
+authors = ["sevkw <kwang0422@gmail.com>"]
+readme = "README.md"
+packages = [{include = "100_days_python"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.0.3"
+requests = "^2.31.0"
+selenium = "^4.11.2"
+beautifulsoup4 = "^4.12.2"
+spotipy = "^2.23.0"
+python-dotenv = "^1.0.0"
+twilio = "^8.5.0"
+pillow = "^10.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
