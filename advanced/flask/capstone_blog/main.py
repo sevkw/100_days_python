@@ -19,5 +19,9 @@ def get_about():
 def get_contact():
     return render_template("contact.html")
 
+@app.route('/post/<int:blog_id>')
+def get_blog(blog_id):
+    return render_template("post.html", posts=all_posts, post_id=blog_id)
+
 if __name__ == "__main__":
     app.run(debug=True)
