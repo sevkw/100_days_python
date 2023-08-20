@@ -8,3 +8,4 @@ plus_intermediate/web_scraping/beautiful_soup/price_tracker/.env.price_tracker
 plus_intermediate/web_scraping/selenium/linkedin/.env.linkedin
 plus_intermediate/web_scraping/selenium/tinder/.env.tinder
 .venv
+/advanced/flask/capstone_blog/.env.email

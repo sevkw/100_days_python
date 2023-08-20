@@ -18,6 +18,10 @@ twilio = "^8.5.0"
 pillow = "^10.0.0"
 flask = "^2.3.2"
 datetime = "^5.2"
+wtforms = "^3.0.1"
+bootstrap-flask = "^2.3.0"
+flask-wtf = "^1.1.1"
+email-validator = "^2.0.0.post2"
 
 
 [build-system]
