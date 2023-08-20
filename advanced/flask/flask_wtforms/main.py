@@ -20,9 +20,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         if form.email.data == "admin@email.com" and form.password.data == "12345678":
-            return "<h1>Login Successful!</h1>"
+            return render_template('login_success.html')
         else:
-            return "<h1>Access Denied</h1>"
+            return render_template('login_failed.html')
     return render_template('login.html', form=form)
 
 
