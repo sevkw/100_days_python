@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email
@@ -8,10 +9,11 @@ class LoginForm(FlaskForm):
     email = StringField(label='Email', validators=[DataRequired(), Email(message="Please ensure Email Address entered is valid!", check_deliverability=True)])
     # password = StringField('Password', validators=[DataRequired(), Length(max=30)])
     password = PasswordField(label='Password', validators=[DataRequired(), Length(min=8, message="Field must be at least 8 characters long.")])
-    submit = SubmitField(label = 'Log In')
+    submit = SubmitField(label='Log In')
 
 
 app = Flask(__name__)
+bootstrap = Bootstrap5(app)
 csrf = CSRFProtect(app)
 app.secret_key = "123456"
 
