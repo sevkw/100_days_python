@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Rating</title>
+</head>
+<body>
+    <p>Book Name: {{ book_to_update.title }}</p>
+    <p>Current Rating: {{ book_to_update.rating }}</p>
+    <form action="{{ url_for('edit') }}" method="POST">
+        <!-- Create a hidden input tag to get hold of the id variable in the current page -->
+        <input hidden="hidden" name="book_id" value="{{ book_to_update.id }}">
+        <input type="text" name="new_rating" placeholder="New Rating" />
+        <button type="submit">Change Rating</button>
+    </form>
+</body>
+</html>
