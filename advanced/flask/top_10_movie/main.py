@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, DecimalField
 from wtforms.validators import DataRequired
 import requests
 
@@ -53,6 +53,11 @@ with app.app_context():
 #     db.session.add(second_movie)
 #     db.session.commit()
 
+class MovieForm(FlaskForm):
+    # no need to have DataRequired() validator b.c sometimes user may not want to update everything
+    new_rating = DecimalField(places=1, label="Your Rating Out of 10 e.g.7.5")
+    new_review = StringField(label="Your Review")
+    submit = SubmitField(label="Done")
 
 @app.route("/")
 def home():
@@ -61,6 +66,22 @@ def home():
         all_movies = db.session.execute(db.select(Movie)).scalars().all()
     return render_template("index.html", movies=all_movies)
 
+
+@app.route("/edit", methods=["GET", "POST"])
+def edit():
+    form = MovieForm()
+    movie_id = request.args.get('id')
+    movie_selected = db.get_or_404(Movie, movie_id)
+    
+    # if form has been validated upon submission
+    if form.validate_on_submit():
+        # update db data
+        movie_selected.rating = form.new_rating.data
+        movie_selected.review = form.new_review.data
+        db.session.commit()
+        return redirect(url_for('home'))
+
+    return render_template('edit.html', movie_to_update=movie_selected, form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
