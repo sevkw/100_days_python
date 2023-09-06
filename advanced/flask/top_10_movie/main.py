@@ -59,6 +59,9 @@ class MovieForm(FlaskForm):
     new_review = StringField(label="Your Review")
     submit = SubmitField(label="Done")
 
+class FindMovie(FlaskForm):
+    title = StringField(label="Movie Title", validators=[DataRequired()])
+    submit = SubmitField(label="Add Movie")
 @app.route("/")
 def home():
     # get data from movies.db to display on the homepage
@@ -82,6 +85,23 @@ def edit():
         return redirect(url_for('home'))
 
     return render_template('edit.html', movie_to_update=movie_selected, form=form)
+
+@app.route("/delete")
+def delete_movie():
+    movie_id = request.args.get('id')
+    movie_selected = db.get_or_404(Movie, movie_id)
+    db.session.delete(movie_selected)
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
+@app.route("/add", methods=["GET", "POST"])
+def add_movie():
+    form = FindMovie()
+    if form.validate_on_submit():
+        pass
+
+    return render_template('add.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
