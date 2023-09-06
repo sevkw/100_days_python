@@ -5,7 +5,17 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DecimalField
 from wtforms.validators import DataRequired
 import requests
+import os
+from dotenv import load_dotenv
 
+#-------------------------------------Movie Search API---------------------------------------------#
+
+load_dotenv(".env.movies")
+# TMDB_TOKEN = os.getenv("TMDB_API_READ_TOKEN")
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+TMDB_URL = "https://api.themoviedb.org/3/search/movie"
+# TMDB_URL_DETAIL = "https://api.themoviedb.org/3/movie/"
+#-------------------------------------Flask App---------------------------------------------#
 
 app = Flask(__name__)
 
@@ -62,6 +72,8 @@ class MovieForm(FlaskForm):
 class FindMovie(FlaskForm):
     title = StringField(label="Movie Title", validators=[DataRequired()])
     submit = SubmitField(label="Add Movie")
+
+#-------------------------------------Flask---------------------------------------------#
 @app.route("/")
 def home():
     # get data from movies.db to display on the homepage
@@ -99,9 +111,45 @@ def delete_movie():
 def add_movie():
     form = FindMovie()
     if form.validate_on_submit():
-        pass
+        search_title = form.title.data
+        search_headers = {
+            "query": search_title,
+            "accept": "application/json",
+            "api_key": TMDB_API_KEY
+        }
+        results = requests.get(TMDB_URL, params=search_headers).json()["results"]
+        return render_template('select.html', movies=results)        
 
     return render_template('add.html', form=form)
 
+@app.route("/find")
+def find_movie():
+    movie_id = request.args.get('api_id')
+    if movie_id:
+        details_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+        details = requests.get(details_url, 
+                               params={
+                                   "accept": "application/json",
+                                   "api_key": TMDB_API_KEY
+                                   }
+                            ).json()
+        movie_title = details["title"]
+        movie_overview = details["overview"]
+        release_year = int(details["release_date"][:4])
+        img_url = f"https://image.tmdb.org/t/p/w500{details['poster_path']}"
+        # print(movie_title, release_year, img_url)
+        # add the selected movie to the database
+        new_movie = Movie(
+            title=movie_title,
+            year=release_year,
+            description=movie_overview,
+            img_url=img_url
+            )
+        db.session.add(new_movie)
+        db.session.commit()
+
+        return redirect(url_for('home'))
+
 if __name__ == '__main__':
     app.run(debug=True)
+
