@@ -78,8 +78,12 @@ class FindMovie(FlaskForm):
 def home():
     # get data from movies.db to display on the homepage
     with app.app_context():
-        all_movies = db.session.execute(db.select(Movie)).scalars().all()
-    return render_template("index.html", movies=all_movies)
+        # all_movies = db.session.execute(db.select(Movie)).scalars().all()
+        ## select movies and sort by rating with highest being the top ranked
+        sorted_movies = db.session.execute(db.select(Movie).order_by(Movie.rating.desc())).scalars().all()
+        for i in range(len(sorted_movies)):
+            sorted_movies[i].ranking = i + 1
+    return render_template("index.html", movies=sorted_movies)
 
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -147,8 +151,8 @@ def find_movie():
             )
         db.session.add(new_movie)
         db.session.commit()
-
-        return redirect(url_for('home'))
+        # args.get will pick up the id defined below
+        return redirect(url_for('edit', id=new_movie.id))
 
 if __name__ == '__main__':
     app.run(debug=True)
