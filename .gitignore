@@ -9,3 +9,4 @@ plus_intermediate/web_scraping/selenium/linkedin/.env.linkedin
 plus_intermediate/web_scraping/selenium/tinder/.env.tinder
 .venv
 /advanced/flask/capstone_blog/.env.email
+/advanced/flask/top_10_movie/.env.movies
