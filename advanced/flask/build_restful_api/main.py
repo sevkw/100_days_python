@@ -8,6 +8,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 db = SQLAlchemy()
 db.init_app(app)
+API_KEY = "TopSecretAPIKey"
 
 
 ##Cafe TABLE Configuration
@@ -103,9 +104,23 @@ def update_price(cafe_id):
         return jsonify(response={"success": "Successfully updated the price."})
     else:
         return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."})  
+    
 
-
-## HTTP DELETE - Delete Record
+@app.route("/report-closed/<int:cafe_id>", methods=["DELETE"])
+def delete_cafe(cafe_id):
+    api_key = request.args.get("api-key")
+    cafe_to_delete = db.get_or_404(Cafe, cafe_id)
+    try:
+        if api_key == API_KEY and cafe_to_delete:
+            db.session.delete(cafe_to_delete)
+            db.session.commit()
+            return jsonify(response={"success": "Successfully reported the cafe closed."}), 200
+        elif api_key != API_KEY:
+            return jsonify(error={"error": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
+        else:
+            return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
+    except TypeError:
+        return jsonify(error={"Not Found": "Sorry cannot find the cafe to remove, or please check your entry."}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
