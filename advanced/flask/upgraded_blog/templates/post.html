@@ -12,6 +12,7 @@
             >Posted by
             <a href="#">{{ post.author }}</a>
             on {{ post.date }}
+            <a href="{{ url_for('delete_post', post_id = post.id) }}">🗑️</a>
           </span>
         </div>
       </div>
