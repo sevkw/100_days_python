@@ -34,11 +34,12 @@ def register():
         # or request.form.get("email") would also work
         input_email = request.form["email"]
         input_name = request.form["name"]
-        input_password = request.form["password"]
+        # hash the password
+        hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256", salt_length=8)
         new_user = User(
             email=input_email,
             name=input_name,
-            password=input_password
+            password=hashed_password
         )
         db.session.add(new_user)
         db.session.commit()
