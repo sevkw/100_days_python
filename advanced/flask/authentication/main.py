@@ -11,9 +11,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy()
 db.init_app(app)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
 
-# CREATE TABLE IN DB
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(User, user_id)
+
+# CREATE TABLE IN DB with the UserMixin
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
@@ -26,6 +32,12 @@ with app.app_context():
 @app.route('/')
 def home():
     return render_template("index.html")
+
+@app.route('/secrets')
+# only authenticated users can access the secrets page
+@login_required
+def secrets():
+    return render_template("secrets.html", name=current_user.name)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -44,24 +56,33 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        return render_template("secrets.html", user=new_user)
+        #log user in upon registration
+        login_user(new_user)
+
+        return redirect(url_for('secrets'))
 
     return render_template("register.html")
 
 
-@app.route('/login')
+@app.route('/login', methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        email = request.form.get('email')
+        password = request.form.get('password')
+        # match user via email
+        user_to_login = db.session.execute(db.select(User).where(User.email == email)).scalar()
+
+        # check if hashed password entry matches the hash in db
+        if check_password_hash(user_to_login.password, password):
+            login_user(user_to_login)
+            return redirect(url_for('secrets'))
+
     return render_template("login.html")
-
-
-@app.route('/secrets')
-def secrets():
-    return render_template("secrets.html")
-
 
 @app.route('/logout')
 def logout():
-    pass
+    logout_user()
+    return redirect(url_for('home'))
 
 
 @app.route('/download')
