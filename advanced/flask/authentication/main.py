@@ -100,7 +100,7 @@ def login():
 
         else:
             login_user(user_to_login)
-            return redirect(url_for('secrets',  logged_in=current_user.is_authenticated))
+            return redirect(url_for('secrets', logged_in=current_user.is_authenticated))
         
         
     return render_template("login.html")
