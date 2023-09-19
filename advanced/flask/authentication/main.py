@@ -42,41 +42,67 @@ def secrets():
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
+    # simple flashing
+    # error = None
     if request.method == "POST":
         # or request.form.get("email") would also work
         input_email = request.form["email"]
         input_name = request.form["name"]
+        email_check = db.session.execute(db.select(User).where(User.email == input_email)).scalar()
+        # check whether the email entry exist in the database
+        if email_check:
+            # error = "The email has been registered with an account. Try another email or login."
+            # return render_template("register.html", error=error)
+            flash("The email has been registered with an account. Please login instead!")
+            return redirect(url_for('login'))
+        else:
         # hash the password
-        hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256", salt_length=8)
-        new_user = User(
-            email=input_email,
-            name=input_name,
-            password=hashed_password
-        )
-        db.session.add(new_user)
-        db.session.commit()
+            hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256", salt_length=8)
+            new_user = User(
+                email=input_email,
+                name=input_name,
+                password=hashed_password
+            )
+            db.session.add(new_user)
+            db.session.commit()
 
-        #log user in upon registration
-        login_user(new_user)
+            #log user in upon registration
+            login_user(new_user)
 
-        return redirect(url_for('secrets'))
+            return redirect(url_for('secrets'))
 
     return render_template("register.html")
 
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
+    # simple flashing code
+    # error = None
     if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
-        # match user via email
         user_to_login = db.session.execute(db.select(User).where(User.email == email)).scalar()
+        # match user via email
 
         # check if hashed password entry matches the hash in db
-        if check_password_hash(user_to_login.password, password):
+        if not user_to_login:
+            # simple flashing code
+            # error = "The email does not exist. Please try again."
+            flash("That email does not exist, please try again.")
+            # return render_template("login.html", error=error)
+            return redirect(url_for('login'))
+        elif not check_password_hash(user_to_login.password, password):
+            # error = "Incorrect password. Please try again."
+            # return render_template("login.html", error=error)
+
+            flash("Password incorrect, please try again.")
+            return redirect(url_for('login'))
+
+        else:
             login_user(user_to_login)
             return redirect(url_for('secrets'))
-
+        
+        
     return render_template("login.html")
 
 @app.route('/logout')
