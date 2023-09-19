@@ -31,13 +31,13 @@ with app.app_context():
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template("index.html", logged_in=current_user.is_authenticated)
 
 @app.route('/secrets')
 # only authenticated users can access the secrets page
 @login_required
 def secrets():
-    return render_template("secrets.html", name=current_user.name)
+    return render_template("secrets.html", name=current_user.name, logged_in=True)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -69,9 +69,9 @@ def register():
             #log user in upon registration
             login_user(new_user)
 
-            return redirect(url_for('secrets'))
+            return redirect(url_for('secrets', logged_in=current_user.is_authenticated))
 
-    return render_template("register.html")
+    return render_template("register.html", logged_in=current_user.is_authenticated)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -100,7 +100,7 @@ def login():
 
         else:
             login_user(user_to_login)
-            return redirect(url_for('secrets'))
+            return redirect(url_for('secrets',  logged_in=current_user.is_authenticated))
         
         
     return render_template("login.html")
@@ -116,7 +116,6 @@ def download():
     return send_from_directory(
         'static',path="files/cheat_sheet.pdf", as_attachment=True
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)
