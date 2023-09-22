@@ -9,7 +9,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
 # Import your forms from the forms.py
-from forms import CreatePostForm, RegisterForm
+from forms import CreatePostForm, RegisterForm, LoginForm
 
 
 app = Flask(__name__)
@@ -18,7 +18,12 @@ ckeditor = CKEditor(app)
 Bootstrap5(app)
 
 # TODO: Configure Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
 
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(User, user_id)
 
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
@@ -55,10 +60,16 @@ with app.app_context():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegisterForm()
-    input_email = form.email.data
-    input_password = form.password.data
-    input_name = form.name.data
     if form.validate_on_submit():
+        input_email = form.email.data
+        input_password = form.password.data
+        input_name = form.name.data
+    # check if user email has been registered with us
+        email_check = db.session.execute(db.select(User).where(User.email == input_email)).scalar()
+        if email_check:
+            flash("The email has been registered. Please log in.")
+            return redirect(url_for('login'))
+
         hashed_password = generate_password_hash(input_password, method="pbkdf2:sha256", salt_length=8)
         new_user = User(
             email=input_email,
@@ -69,18 +80,40 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        login_user(new_user)
+
         return redirect(url_for("get_all_posts"))    
     
     return render_template("register.html", form=form)
 
 # TODO: Retrieve a user from the database based on their email. 
-@app.route('/login')
+@app.route('/login', methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    login_form = LoginForm()
+
+    if login_form.validate_on_submit():
+        login_email = login_form.email.data
+        login_password = login_form.password.data
+        user_in_db = db.session.execute(db.select(User).where(User.email == login_email)).scalar()
+        
+        if not user_in_db:
+            flash("That email does not exist, please try again.")
+            return redirect(url_for('login'))
+    
+        elif not check_password_hash(user_in_db.password, login_password):
+            flash("Incorrect password. Please try again.")
+            return redirect(url_for('login'))
+    
+        else:
+            login_user(user_in_db)
+            return redirect(url_for('get_all_posts'))
+    
+    return render_template("login.html", form=login_form)
 
 
 @app.route('/logout')
 def logout():
+    logout_user()
     return redirect(url_for('get_all_posts'))
 
 
@@ -88,7 +121,7 @@ def logout():
 def get_all_posts():
     result = db.session.execute(db.select(BlogPost))
     posts = result.scalars().all()
-    return render_template("index.html", all_posts=posts)
+    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated)
 
 
 # TODO: Allow logged-in users to comment on posts
