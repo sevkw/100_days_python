@@ -11,7 +11,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
 
 # Import your forms from the forms.py
-from forms import CreatePostForm, RegisterForm, LoginForm
+from forms import CreatePostForm, RegisterForm, LoginForm, NewComments
 
 
 app = Flask(__name__)
@@ -46,6 +46,8 @@ class User(UserMixin, db.Model):
     posts = db.relationship('BlogPost', back_populates='author')
     # posts: Mapped[list["BlogPost"]] = db.relationship(back_populates="author")
 
+    post_comments = db.relationship('Comment', back_populates='commenter')
+
 # the BlogPost db will be the child class when joining to User db
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
@@ -62,6 +64,14 @@ class BlogPost(db.Model):
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
+
+class Comment(db.Model):
+    __tablename__ = "comments"
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+
+    commenter_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    commenter = db.relationship("User", back_populates="post_comments")
 
 with app.app_context():
     db.create_all()
@@ -139,7 +149,8 @@ def get_all_posts():
 @app.route("/post/<int:post_id>")
 def show_post(post_id):
     requested_post = db.get_or_404(BlogPost, post_id)
-    return render_template("post.html", post=requested_post)
+    comment_form = NewComments()
+    return render_template("post.html", post=requested_post, form=comment_form)
 
 
 # TODO: Use a decorator so only an admin user can create a new post
