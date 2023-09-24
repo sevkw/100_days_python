@@ -7,7 +7,9 @@ from flask_login import UserMixin, login_user, LoginManager, current_user, logou
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import ForeignKey
+
 # Import your forms from the forms.py
 from forms import CreatePostForm, RegisterForm, LoginForm
 
@@ -32,22 +34,8 @@ db.init_app(app)
 
 
 # CONFIGURE TABLES
-class BlogPost(db.Model):
-    __tablename__ = "blog_posts"
-    id = db.Column(db.Integer, primary_key=True)
-    
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    author = relationship("User", back_populates="posts")
-    
-    title = db.Column(db.String(250), unique=True, nullable=False)
-    subtitle = db.Column(db.String(250), nullable=False)
-    date = db.Column(db.String(250), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(250), nullable=False)
-    img_url = db.Column(db.String(250), nullable=False)
-
-
 # TODO: Create a User table for all your registered users. 
+# parent db in a 1:many relationship
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -55,7 +43,25 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(250), nullable=False)
     name = db.Column(db.String(250), nullable=False)
 
-    posts = relationship("BlogPost", back_populates="author")
+    posts = db.relationship('BlogPost', back_populates='author')
+    # posts: Mapped[list["BlogPost"]] = db.relationship(back_populates="author")
+
+# the BlogPost db will be the child class when joining to User db
+class BlogPost(db.Model):
+    __tablename__ = "blog_posts"
+    id = db.Column(db.Integer, primary_key=True)
+    
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    author = db.relationship("User", back_populates="posts")
+
+    # author_id: Mapped[int] = mapped_column(db.ForeignKey("users.id"))
+    # author: Mapped["User"] = db.relationship(back_populates="posts")
+
+    title = db.Column(db.String(250), unique=True, nullable=False)
+    subtitle = db.Column(db.String(250), nullable=False)
+    date = db.Column(db.String(250), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    img_url = db.Column(db.String(250), nullable=False)
 
 with app.app_context():
     db.create_all()
