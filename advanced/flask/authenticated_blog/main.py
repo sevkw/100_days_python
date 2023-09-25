@@ -32,6 +32,25 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy()
 db.init_app(app)
 
+# Initialize Gravatar for generating user profile pictures
+gravatar = Gravatar(app,
+                    size=100,
+                    rating='g',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False,
+                    use_ssl=False,
+                    base_url=None)
+
+# admin only decorator
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.id != 1:
+            return abort(403)
+        return f(*args, **kwargs)
+    
+    return decorated_function
 
 # CONFIGURE TABLES
 # TODO: Create a User table for all your registered users. 
@@ -65,6 +84,8 @@ class BlogPost(db.Model):
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
 
+    comments = db.relationship("Comment", back_populates="parent_post")
+
 class Comment(db.Model):
     __tablename__ = "comments"
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +93,9 @@ class Comment(db.Model):
 
     commenter_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     commenter = db.relationship("User", back_populates="post_comments")
+    
+    post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
+    parent_post = db.relationship("BlogPost", back_populates="comments")
 
 with app.app_context():
     db.create_all()
@@ -146,15 +170,29 @@ def get_all_posts():
 
 
 # TODO: Allow logged-in users to comment on posts
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
     requested_post = db.get_or_404(BlogPost, post_id)
     comment_form = NewComments()
+    if comment_form.validate_on_submit():
+        if current_user.is_authenticated:
+            new_comment = Comment(
+                text=comment_form.comment.data,
+                commenter_id=current_user.id,
+                post_id=post_id
+            )
+            db.session.add(new_comment)
+            db.session.commit()
+        else:
+            flash("You need to Login or Register to comment.")
+            return redirect(url_for('login'))
+    
     return render_template("post.html", post=requested_post, form=comment_form)
 
 
 # TODO: Use a decorator so only an admin user can create a new post
 @app.route("/new-post", methods=["GET", "POST"])
+@admin_only
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -174,6 +212,7 @@ def add_new_post():
 
 # TODO: Use a decorator so only an admin user can edit a post
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
+@admin_only
 def edit_post(post_id):
     post = db.get_or_404(BlogPost, post_id)
     edit_form = CreatePostForm(
@@ -196,6 +235,7 @@ def edit_post(post_id):
 
 # TODO: Use a decorator so only an admin user can delete a post
 @app.route("/delete/<int:post_id>")
+@admin_only
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
     db.session.delete(post_to_delete)
